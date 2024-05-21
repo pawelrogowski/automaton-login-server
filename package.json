@@ -1,0 +1,22 @@
+{
+  "name": "automaton-login-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "prod": "NODE_ENV=production node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/mongodb": "^8.0.0",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.27.0",
+    "fastify-cli": "^6.1.1",
+    "fastify-env": "^2.2.0",
+    "mongoose": "^8.4.0",
+    "validator": "^13.12.0"
+  }
+}
