@@ -10,6 +10,10 @@ connectDb()
   .then(() => {
     console.log("Connected to MongoDB successfully.");
 
+    fastify.get("/heartbeat", async (request, reply) => {
+      return { status: "OK" };
+    });
+
     fastify.post("/users", async (request, reply) => {
       const userData = request.body;
       try {
