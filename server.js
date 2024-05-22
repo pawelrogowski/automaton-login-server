@@ -83,16 +83,13 @@ connectDb()
     });
 
     // Start the server
-    fastify.listen(
-      { port: process.env.RENDER_PORT || 3000 },
-      (err, address) => {
-        if (err) {
-          fastify.log.error(err);
-          process.exit(1);
-        }
-        console.log(`Server listening at ${address}`);
+    fastify.listen({ port: process.env.PORT || 3000 }, (err, address) => {
+      if (err) {
+        fastify.log.error(err);
+        process.exit(1);
       }
-    );
+      console.log(`Server listening at ${address}`);
+    });
   })
   .catch((error) => {
     console.error("Failed to connect to MongoDB:", error);
