@@ -85,7 +85,7 @@ connectDb()
     // Start the server
     fastify.listen(
       {
-        port: process.env.RENDER_PORT || 3000,
+        port: process.env.PORT || 3000,
         host: process.env.HOST || "127.0.0.1",
       },
       (err, address) => {
