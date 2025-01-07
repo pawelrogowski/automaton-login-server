@@ -3,15 +3,15 @@ previews:
 
 services:
   - type: web
-    runtime: Bun
+    runtime: Node.js
     name: automaton-login-server
     repo: https://github.com/pawelrogowski/automaton-login-server
     numInstances: 1
     region: us-central
     plan: free
     branch: main
-    buildCommand: bun install
-    startCommand: bun run server.js
+    buildCommand: bun i
+    startCommand: bun run start
     autoDeploy: true
     envVars:
       - key: MONGODB_URI
