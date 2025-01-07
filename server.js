@@ -1,5 +1,6 @@
 // server.js
 require("dotenv").config();
+const bcrypt = require("bcrypt");
 const fastify = require("fastify")({
 	ignoreTrailingSlash: true,
 });
@@ -11,7 +12,39 @@ connectDb()
 		console.log("Connected to MongoDB successfully.");
 
 		fastify.get("/", async (request, reply) => {
-			return { status: "OK" };
+			try {
+				return { status: "OK" };
+			} catch (error) {
+				return reply.status(500).send({ message: "Internal Server Error" });
+			}
+		});
+
+		fastify.post("/login", async (request, reply) => {
+			const { email, password } = request.body;
+
+			if (!email || !password) {
+				return reply.status(400).send({
+					message: "Email and password are required",
+				});
+			}
+
+			try {
+				const user = await UserController.loginUser(email, password);
+				return reply.status(200).send({
+					message: "Login successful",
+					user,
+				});
+			} catch (error) {
+				if (error.message === "Invalid email or password") {
+					return reply.status(401).send({
+						message: error.message,
+					});
+				}
+				console.error("Login error:", error);
+				return reply.status(500).send({
+					message: "Internal Server Error",
+				});
+			}
 		});
 
 		fastify.post("/users", async (request, reply) => {
@@ -20,7 +53,9 @@ connectDb()
 				const newUser = await UserController.createUser(userData);
 				return newUser;
 			} catch (error) {
-				return reply.status(500).send({ message: "Internal Server Error" });
+				return reply
+					.status(500)
+					.send({ message: "Internal Server Error", error });
 			}
 		});
 

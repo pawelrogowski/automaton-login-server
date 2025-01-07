@@ -2,13 +2,13 @@ services:
   # Service name
   - type: web
     name: automaton-login-server
-    env: bun
+    env: node
     region: frankfurt # or choose frankfurt, singapore etc.
     plan: free # or starter, standard, etc.
 
     # Build settings
-    buildCommand: bun i
-    startCommand: bun run start
+    buildCommand: npm i
+    startCommand: npm run start
 
     # Deployment settings
     autoDeploy: true # Enable auto-deployment on push to main branch
