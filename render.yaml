@@ -1,7 +1,7 @@
 services:
   # Service name
   - type: web
-    name: fastify-auth-service
+    name: automaton-login-server
     env: node
     region: frankfurt  # or choose frankfurt, singapore etc.
     plan: free  # or starter, standard, etc.
