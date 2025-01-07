@@ -20,19 +20,3 @@ services:
         value: ${JWT_SECRET}
       - key: PORT
         value: ${PORT:-3000}
-
-databases:
-  - type: mongo
-    name: automaton-login-mongodb
-    service: automaton-login-server
-    enabled: true
-    plan: free
-    envVars:
-      - key: MONGO_INITDB_ROOT_USERNAME
-        value: ${MONGO_INITDB_ROOT_USERNAME}
-      - key: MONGO_INITDB_ROOT_PASSWORD
-        value: ${MONGO_INITDB_ROOT_PASSWORD}
-
-healthCheck:
-  enabled: true
-  command: curl -f http://localhost:3000/api/health || exit 1
