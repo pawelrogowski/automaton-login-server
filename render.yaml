@@ -3,7 +3,7 @@ previews:
 
 services:
   - type: web
-    runtime: bun
+    runtime: Bun
     name: automaton-login-server
     repo: https://github.com/pawelrogowski/automaton-login-server
     numInstances: 1
