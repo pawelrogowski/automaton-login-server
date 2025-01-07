@@ -12,11 +12,7 @@ services:
     
     # Deployment settings
     autoDeploy: true  # Enable auto-deployment on push to main branch
-    
-    # Resource allocation (free tier)
-    instance_count: 1
-    size: free
-    
+  
     # Health check
     healthCheckPath: /
     
