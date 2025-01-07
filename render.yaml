@@ -2,31 +2,31 @@ services:
   # Service name
   - type: web
     name: automaton-login-server
-    env: node
-    region: frankfurt  # or choose frankfurt, singapore etc.
-    plan: free  # or starter, standard, etc.
-    
+    env: bun
+    region: frankfurt # or choose frankfurt, singapore etc.
+    plan: free # or starter, standard, etc.
+
     # Build settings
-    buildCommand: npm install
-    startCommand: npm run start
-    
+    buildCommand: bun i
+    startCommand: bun run start
+
     # Deployment settings
-    autoDeploy: true  # Enable auto-deployment on push to main branch
-  
+    autoDeploy: true # Enable auto-deployment on push to main branch
+
     # Health check
     healthCheckPath: /
-    
+
     # Environment variables
     envVars:
-      - key: NODE_ENV
-        value: production
       - key: PORT
         value: 3000
-      
+      - key: HOST
+        value: 0.0.0.0
+
     # Git settings (uncomment and modify if using private repo)
     # repo: https://github.com/username/repo-name
     # branch: main
-    
+
     # HTTPS settings
     domains:
-      - automaton-login-server01.onrender.com  # This will be your default domain
+      - automaton-login-server01.onrender.com # This will be your default domain
