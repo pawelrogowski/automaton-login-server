@@ -42,7 +42,7 @@ connectDb()
 				}
 				console.error("Login error:", error);
 				return reply.status(500).send({
-					message: "Internal Server Error",
+					message: `"Internal Server Error" ${error}`,
 				});
 			}
 		});
