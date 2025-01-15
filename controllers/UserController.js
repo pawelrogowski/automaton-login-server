@@ -23,7 +23,7 @@ exports.createUser = async (userData) => {
 	}
 };
 
-// Add the new login function
+// login function
 exports.loginUser = async (email, password) => {
 	// Find user by email
 	const user = await User.findOne({ email });
@@ -37,7 +37,13 @@ exports.loginUser = async (email, password) => {
 		throw new Error("Invalid email or password");
 	}
 
-	return user; // Password will be automatically excluded thanks to toJSON method
+	// Calculate and check subscription status
+	const daysLeft = user.calculateDaysLeft();
+	if (daysLeft <= 0) {
+		throw new Error("Subscription expired");
+	}
+
+	return user;
 };
 
 exports.getUserByEmail = async (email) => {
@@ -61,7 +67,6 @@ exports.deleteUser = async (email) => {
 	return User.findByIdAndDelete({ email: email });
 };
 
-// UserController.js
 exports.changeEmail = async (email, newEmail) => {
 	const user = await User.findOne({ email: email });
 	if (!user) throw new Error("User not found");
@@ -76,4 +81,41 @@ exports.changePassword = async (email, newPassword) => {
 	const saltRounds = 10;
 	user.password = await bcrypt.hash(newPassword, saltRounds);
 	return user.save();
+};
+
+// method to update subscription
+exports.updateSubscription = async (email, additionalDays) => {
+	const user = await User.findOne({ email });
+	if (!user) throw new Error("User not found");
+
+	// Reset start date and add days if subscription expired
+	const daysLeft = user.calculateDaysLeft();
+	if (daysLeft <= 0) {
+		user.subscriptionStartDate = new Date();
+		user.totalSubscriptionDays = additionalDays;
+	} else {
+		// Add days to existing subscription
+		user.totalSubscriptionDays += additionalDays;
+	}
+
+	return user.save();
+};
+
+exports.createUser = async (userData) => {
+	try {
+		const saltRounds = 10;
+		const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
+
+		const newUser = new User({
+			...userData,
+			password: hashedPassword,
+			subscriptionStartDate: new Date(),
+			totalSubscriptionDays: userData.totalSubscriptionDays || 0,
+		});
+
+		return await newUser.save();
+	} catch (error) {
+		console.error("Error creating user:", error);
+		throw error;
+	}
 };
