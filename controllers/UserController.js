@@ -1,9 +1,27 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 
+const validatePassword = (password) => {
+	// Password must have:
+	// - at least 8 characters
+	// - one digit
+	// - one special character
+	// - one uppercase letter
+	const passwordRegex =
+		/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@$%!]).*[A-Za-z\d@$%!]{8,}$/;
+	return passwordRegex.test(password);
+};
+
 // Modify the existing createUser function
 exports.createUser = async (userData) => {
 	try {
+		// Validate password before hashing
+		if (!validatePassword(userData.password)) {
+			throw new Error(
+				"Password must have at least 8 characters, one digit, one special character, and one uppercase letter"
+			);
+		}
+
 		// Hash the password
 		const saltRounds = 10;
 		const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
@@ -17,13 +35,13 @@ exports.createUser = async (userData) => {
 		// Save user and return
 		return await newUser.save();
 	} catch (error) {
-		// Add better error handling
 		console.error("Error creating user:", error);
 		throw error;
 	}
 };
 
-// Add the new login function
+// login function
+// UserController.js - Update the loginUser function
 exports.loginUser = async (email, password) => {
 	// Find user by email
 	const user = await User.findOne({ email });
@@ -37,7 +55,22 @@ exports.loginUser = async (email, password) => {
 		throw new Error("Invalid email or password");
 	}
 
-	return user; // Password will be automatically excluded thanks to toJSON method
+	// Calculate detailed time left
+	const timeLeft = user.calculateTimeLeft();
+	if (timeLeft.isExpired) {
+		throw new Error("Subscription expired");
+	}
+
+	// Update the user's totalSubscriptionDays to reflect the actual days remaining
+	// We use ceil to ensure user doesn't lose partial days
+	user.totalSubscriptionDays = Math.ceil(timeLeft.totalMinutesLeft / (24 * 60));
+	await user.save();
+
+	// Add timeLeft to user object for response
+	const userObject = user.toObject();
+	userObject.timeLeft = timeLeft;
+
+	return userObject;
 };
 
 exports.getUserByEmail = async (email) => {
@@ -61,7 +94,6 @@ exports.deleteUser = async (email) => {
 	return User.findByIdAndDelete({ email: email });
 };
 
-// UserController.js
 exports.changeEmail = async (email, newEmail) => {
 	const user = await User.findOne({ email: email });
 	if (!user) throw new Error("User not found");
@@ -76,4 +108,41 @@ exports.changePassword = async (email, newPassword) => {
 	const saltRounds = 10;
 	user.password = await bcrypt.hash(newPassword, saltRounds);
 	return user.save();
+};
+
+// method to update subscription
+exports.updateSubscription = async (email, additionalDays) => {
+	const user = await User.findOne({ email });
+	if (!user) throw new Error("User not found");
+
+	// Reset start date and add days if subscription expired
+	const daysLeft = user.calculateDaysLeft();
+	if (daysLeft <= 0) {
+		user.subscriptionStartDate = new Date();
+		user.totalSubscriptionDays = additionalDays;
+	} else {
+		// Add days to existing subscription
+		user.totalSubscriptionDays += additionalDays;
+	}
+
+	return user.save();
+};
+
+exports.createUser = async (userData) => {
+	try {
+		const saltRounds = 10;
+		const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
+
+		const newUser = new User({
+			...userData,
+			password: hashedPassword,
+			subscriptionStartDate: new Date(),
+			totalSubscriptionDays: userData.totalSubscriptionDays || 0,
+		});
+
+		return await newUser.save();
+	} catch (error) {
+		console.error("Error creating user:", error);
+		throw error;
+	}
 };
