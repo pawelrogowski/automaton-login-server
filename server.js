@@ -32,13 +32,21 @@ connectDb()
 				const user = await UserController.loginUser(email, password);
 				const { days, hours, minutes } = user.timeLeft;
 
+				// Construct the message with correct singular/plural forms
+				const daysText = `${days} ${days === 1 ? "day" : "days"}`;
+				const hoursText = `${hours} ${hours === 1 ? "hour" : "hours"}`;
+				const minutesText = `${minutes} ${
+					minutes === 1 ? "minute" : "minutes"
+				}`;
+				const timeLeftMessage = `${daysText} ${hoursText} and ${minutesText} left`;
+
 				// Log the successful login attempt
 				console.log(
-					`[LOGIN ATTEMPT] Email: ${email}, Subscription Remaining: ${days} days, ${hours} hours, ${minutes} minutes`
+					`[LOGIN ATTEMPT] Email: ${email}, Subscription Remaining: ${timeLeftMessage}`
 				);
 
 				return reply.status(200).send({
-					message: `Login successful - ${days} days ${hours} hours and ${minutes} left`,
+					message: `Login successful - ${timeLeftMessage}`,
 					user,
 				});
 			} catch (error) {
