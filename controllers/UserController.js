@@ -61,10 +61,8 @@ exports.loginUser = async (email, password) => {
 		throw new Error("Subscription expired");
 	}
 
-	// Update the user's totalSubscriptionDays to reflect the actual days remaining
-	// We use ceil to ensure user doesn't lose partial days
-	user.totalSubscriptionDays = Math.ceil(timeLeft.totalMinutesLeft / (24 * 60));
-	await user.save();
+	// Important: Don't update totalSubscriptionDays here anymore
+	// We keep the original subscription duration
 
 	// Add timeLeft to user object for response
 	const userObject = user.toObject();

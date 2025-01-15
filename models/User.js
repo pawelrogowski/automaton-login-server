@@ -53,7 +53,7 @@ userSchema.methods.calculateTimeLeft = function () {
 	const startDate = this.subscriptionStartDate;
 	const totalDays = this.totalSubscriptionDays;
 
-	// Convert total days to milliseconds
+	// Convert total days to milliseconds from the start date
 	const totalMs = totalDays * 24 * 60 * 60 * 1000;
 	const endDate = new Date(startDate.getTime() + totalMs);
 	const msLeft = endDate - now;
@@ -82,7 +82,6 @@ userSchema.methods.calculateTimeLeft = function () {
 		isExpired: false,
 	};
 };
-
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
