@@ -30,8 +30,10 @@ connectDb()
 
 			try {
 				const user = await UserController.loginUser(email, password);
+				const { days, hours, minutes } = user.timeLeft;
+
 				return reply.status(200).send({
-					message: `Login successful ${user.totalSubscriptionDays} days left`,
+					message: `Login successful - ${days} days ${hours}:${minutes} left`,
 					user,
 				});
 			} catch (error) {

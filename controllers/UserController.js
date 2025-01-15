@@ -41,6 +41,7 @@ exports.createUser = async (userData) => {
 };
 
 // login function
+// UserController.js - Update the loginUser function
 exports.loginUser = async (email, password) => {
 	// Find user by email
 	const user = await User.findOne({ email });
@@ -54,13 +55,22 @@ exports.loginUser = async (email, password) => {
 		throw new Error("Invalid email or password");
 	}
 
-	// Calculate and check subscription status
-	const daysLeft = user.calculateDaysLeft();
-	if (daysLeft <= 0) {
+	// Calculate detailed time left
+	const timeLeft = user.calculateTimeLeft();
+	if (timeLeft.isExpired) {
 		throw new Error("Subscription expired");
 	}
 
-	return user;
+	// Update the user's totalSubscriptionDays to reflect the actual days remaining
+	// We use ceil to ensure user doesn't lose partial days
+	user.totalSubscriptionDays = Math.ceil(timeLeft.totalMinutesLeft / (24 * 60));
+	await user.save();
+
+	// Add timeLeft to user object for response
+	const userObject = user.toObject();
+	userObject.timeLeft = timeLeft;
+
+	return userObject;
 };
 
 exports.getUserByEmail = async (email) => {

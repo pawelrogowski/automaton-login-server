@@ -48,6 +48,41 @@ userSchema.methods.toJSON = function () {
 	return userObject;
 };
 
+userSchema.methods.calculateTimeLeft = function () {
+	const now = new Date();
+	const startDate = this.subscriptionStartDate;
+	const totalDays = this.totalSubscriptionDays;
+
+	// Convert total days to milliseconds
+	const totalMs = totalDays * 24 * 60 * 60 * 1000;
+	const endDate = new Date(startDate.getTime() + totalMs);
+	const msLeft = endDate - now;
+
+	if (msLeft <= 0) {
+		return {
+			days: 0,
+			hours: 0,
+			minutes: 0,
+			totalMinutesLeft: 0,
+			isExpired: true,
+		};
+	}
+
+	// Calculate the components
+	const days = Math.floor(msLeft / (24 * 60 * 60 * 1000));
+	const hours = Math.floor((msLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+	const minutes = Math.floor((msLeft % (60 * 60 * 1000)) / (60 * 1000));
+	const totalMinutesLeft = Math.floor(msLeft / (60 * 1000));
+
+	return {
+		days,
+		hours,
+		minutes,
+		totalMinutesLeft,
+		isExpired: false,
+	};
+};
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
