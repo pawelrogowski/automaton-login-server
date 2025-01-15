@@ -40,9 +40,14 @@ connectDb()
 						message: error.message,
 					});
 				}
+				if (error.message === "Subscription expired") {
+					return reply.status(403).send({
+						message: error.message,
+					});
+				}
 				console.error("Login error:", error);
 				return reply.status(500).send({
-					message: `"Internal Server Error" ${error}`,
+					message: "Internal Server Error",
 				});
 			}
 		});
