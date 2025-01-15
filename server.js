@@ -31,7 +31,7 @@ connectDb()
 			try {
 				const user = await UserController.loginUser(email, password);
 				return reply.status(200).send({
-					message: `Login successful ${user.daysLeft} days left`,
+					message: `Login successful ${user.totalSubscriptionDays} days left`,
 					user,
 				});
 			} catch (error) {
