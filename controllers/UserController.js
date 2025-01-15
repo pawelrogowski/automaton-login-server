@@ -1,9 +1,27 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 
+const validatePassword = (password) => {
+	// Password must have:
+	// - at least 8 characters
+	// - one digit
+	// - one special character
+	// - one uppercase letter
+	const passwordRegex =
+		/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@$%!]).*[A-Za-z\d@$%!]{8,}$/;
+	return passwordRegex.test(password);
+};
+
 // Modify the existing createUser function
 exports.createUser = async (userData) => {
 	try {
+		// Validate password before hashing
+		if (!validatePassword(userData.password)) {
+			throw new Error(
+				"Password must have at least 8 characters, one digit, one special character, and one uppercase letter"
+			);
+		}
+
 		// Hash the password
 		const saltRounds = 10;
 		const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
@@ -17,7 +35,6 @@ exports.createUser = async (userData) => {
 		// Save user and return
 		return await newUser.save();
 	} catch (error) {
-		// Add better error handling
 		console.error("Error creating user:", error);
 		throw error;
 	}
