@@ -32,22 +32,38 @@ connectDb()
 				const user = await UserController.loginUser(email, password);
 				const { days, hours, minutes } = user.timeLeft;
 
+				// Log the successful login attempt
+				console.log(
+					`[LOGIN ATTEMPT] Email: ${email}, Subscription Remaining: ${days} days, ${hours} hours, ${minutes} minutes`
+				);
+
 				return reply.status(200).send({
-					message: `Login successful - ${days} days ${hours}:${minutes} left`,
+					message: `Login successful - ${days} days ${hours} hours and ${minutes} left`,
 					user,
 				});
 			} catch (error) {
+				// Log the error with the appropriate message
 				if (error.message === "Invalid email or password") {
+					console.error(
+						`[LOGIN ATTEMPT] Email: ${email}, Error: ${error.message}`
+					);
 					return reply.status(401).send({
 						message: error.message,
 					});
 				}
 				if (error.message === "Subscription expired") {
+					console.error(
+						`[LOGIN ATTEMPT] Email: ${email}, Error: ${error.message}`
+					);
 					return reply.status(403).send({
 						message: error.message,
 					});
 				}
-				console.error("Login error:", error);
+
+				console.error(
+					`[LOGIN ATTEMPT] Email: ${email}, Error: Internal Server Error`,
+					error
+				);
 				return reply.status(500).send({
 					message: "Internal Server Error",
 				});
