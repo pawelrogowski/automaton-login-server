@@ -20,7 +20,11 @@ connectDb()
 		});
 
 		fastify.post("/login", async (request, reply) => {
-			const { email, password } = request.body;
+			const { email, password, hardwareId } = request.body;
+			const deviceHeader = request.headers["x-device-id"];
+
+			// Combine potential hardware ID sources (body takes precedence)
+			const loggableHardwareId = hardwareId || deviceHeader;
 
 			if (!email || !password) {
 				return reply.status(400).send({
@@ -40,9 +44,11 @@ connectDb()
 				}`;
 				const timeLeftMessage = `${daysText} ${hoursText} and ${minutesText} left`;
 
-				// Log the successful login attempt
+				// Log with conditional hardware ID
 				console.log(
-					`[LOGIN ATTEMPT] Email: ${email}, Subscription Remaining: ${timeLeftMessage}`
+					`[LOGIN ATTEMPT] Email: ${email}` +
+						(loggableHardwareId ? `, Hardware ID: ${loggableHardwareId}` : "") +
+						`, Subscription Remaining: ${timeLeftMessage}`
 				);
 
 				return reply.status(200).send({
@@ -50,28 +56,32 @@ connectDb()
 					user,
 				});
 			} catch (error) {
-				// Log the error with the appropriate message
-				if (error.message === "Invalid email or password") {
+				// Generic error logging function with hardware ID support
+				const logError = (message) => {
 					console.error(
-						`[LOGIN ATTEMPT] Email: ${email}, Error: ${error.message}`
+						`[LOGIN ATTEMPT] Email: ${email}` +
+							(loggableHardwareId
+								? `, Hardware ID: ${loggableHardwareId}`
+								: "") +
+							`, Error: ${message}`
 					);
+				};
+
+				if (error.message === "Invalid email or password") {
+					logError("Invalid email or password");
 					return reply.status(401).send({
 						message: error.message,
 					});
 				}
 				if (error.message === "Subscription expired") {
-					console.error(
-						`[LOGIN ATTEMPT] Email: ${email}, Error: ${error.message}`
-					);
+					logError("Subscription expired");
 					return reply.status(403).send({
 						message: error.message,
 					});
 				}
 
-				console.error(
-					`[LOGIN ATTEMPT] Email: ${email}, Error: Internal Server Error`,
-					error
-				);
+				logError("Internal Server Error");
+				console.error(error); // Log full error for server-side debugging
 				return reply.status(500).send({
 					message: "Internal Server Error",
 				});
